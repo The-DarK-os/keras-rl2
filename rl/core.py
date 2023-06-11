@@ -1,6 +1,7 @@
 import warnings
 from copy import deepcopy
-
+import matplotlib.pyplot as plt
+from IPython import display
 import numpy as np
 from tensorflow.keras.callbacks import History
 
@@ -12,6 +13,14 @@ from rl.callbacks import (
     Visualizer
 )
 
+
+def show_state(env):
+    plt.figure(3)
+    plt.clf()
+    plt.imshow(env.render(mode='rgb_array'))
+    plt.axis('off')
+    display.clear_output(wait=True)
+    plt.display(plt.gcf())
 
 class Agent:
     """Abstract base class for all implemented agents.
@@ -48,6 +57,8 @@ class Agent:
             Dictionnary with agent configuration
         """
         return {}
+    
+
 
     def fit(self, env, nb_steps, action_repetition=1, callbacks=None, verbose=1,
             visualize=False, nb_max_start_steps=0, start_step_policy=None, log_interval=10000,
@@ -95,6 +106,8 @@ class Agent:
             callbacks += [TrainEpisodeLogger()]
         if visualize:
             callbacks += [Visualizer()]
+            show_state(env)
+
         history = History()
         callbacks += [history]
         callbacks = CallbackList(callbacks)
@@ -121,6 +134,7 @@ class Agent:
         did_abort = False
         try:
             while self.step < nb_steps:
+                show_state(env)
                 if observation is None:  # start of a new episode
                     callbacks.on_episode_begin(episode)
                     episode_step = np.int16(0)
